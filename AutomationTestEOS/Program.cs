@@ -18,9 +18,9 @@ namespace AutomationTestEOS
         {
            
     
-            string driverPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(
-    TestContext.CurrentContext.TestDirectory))) + "/Drivers";
-            driver = new ChromeDriver(driverPath);
+    //        string driverPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(
+    //TestContext.CurrentContext.TestDirectory))) + "/Drivers";
+            driver = new ChromeDriver();
         }
 
         [Test]
@@ -30,7 +30,7 @@ namespace AutomationTestEOS
             driver.Navigate().GoToUrl("https://www.amazon.co.uk/");
 
             // Waiting for loading navFooter as guarantie that the page is loaded
-            Assert.True(WaitUntilElementVisible(By.XPath(".//*[@id='navFooter']")).Displayed);          
+            Assert.True(WaitUntilElementVisible(By.Id("navFooter")).Displayed);          
             Assert.True(driver.Title.Contains("Amazon.co.uk"));
 
             // Accepting cookies
@@ -48,11 +48,11 @@ namespace AutomationTestEOS
             IWebElement firstElementOfTheSearch = WaitUntilElementVisible(By.XPath(".//*[@cel_widget_id='MAIN-SEARCH_RESULTS-1']"));
             
             // Taking the element title
-            IWebElement textOfTheElement = firstElementOfTheSearch.FindElement(By.XPath(".//h2/a/span"));
+            IWebElement textOfTheElement = driver.FindElement(By.XPath(".//*[@cel_widget_id='MAIN-SEARCH_RESULTS-1']//h2/a/span"));
 
             // Taking the elements with the paperback text and link
-            IWebElement paperBackElement = firstElementOfTheSearch.FindElement(By.XPath("//div/div/div[2]/div[2]/div/div[2]/div[1]/div/div[1]"));
-            IWebElement paperBackElementLink = paperBackElement.FindElement(By.XPath(".//a"));// Paperback
+            IWebElement paperBackElement = driver.FindElement(By.XPath("//a[normalize-space(text()) = 'Paperback']"));
+            //IWebElement paperBackElementLink = paperBackElement.FindElement(By.XPath(".//a"));// Paperback
 
             // Taking paperback price element
             IWebElement paperBackPriceSymbolElement = paperBackElement.FindElement(By.XPath("//span[contains(@class, 'a-price-symbol')]"));
@@ -62,16 +62,17 @@ namespace AutomationTestEOS
             // Constructing price string from the price elements
             string priceString = $"{paperBackPriceSymbolElement.Text}{paperBackPriceWholeElement.Text}.{paperBackPriceFractionElement.Text}";
 
+            var text = textOfTheElement.Text;
             // Checking for the correct title
             Assert.True(textOfTheElement.Text.Contains(stringToSearch));
 
             // Checking is this a paperback option
-            Assert.True(paperBackElementLink.Text.Contains("Paperback"));
+            Assert.True(paperBackElement.Text.Contains("Paperback"));
 
-            paperBackElementLink.Click();
+            paperBackElement.Click();
 
             // Waiting for the product page to be loaded
-            IWebElement secondPageTitleElement = WaitUntilElementVisible(By.XPath(".//*[@id='productTitle']"));
+            IWebElement secondPageTitleElement = WaitUntilElementVisible(By.Id("productTitle"));
 
             // Checking is this the correct title
             Assert.True(secondPageTitleElement.Text.Contains(stringToSearch));
